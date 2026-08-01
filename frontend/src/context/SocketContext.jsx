@@ -10,7 +10,7 @@ export const SocketProvider = ({ children }) => {
 
   useEffect(() => {
     if (user) {
-      const newSocket = io("http://localhost:5000");
+      const newSocket = io("https://chatappbackend-jjy1prub.b4a.run");
       setSocket(newSocket);
 
       newSocket.emit("user_online", user._id);
