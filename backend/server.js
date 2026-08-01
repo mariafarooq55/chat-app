@@ -15,7 +15,7 @@ const server = http.createServer(app);
 
 const io = new Server(server, {
   cors: {
-    origin: "http://localhost:5173",
+    origin: "*",
     methods: ["GET", "POST"],
   },
 });
@@ -34,13 +34,11 @@ app.get("/", (req, res) => {
 io.on("connection", (socket) => {
   console.log("User connected:", socket.id);
 
-  // Join a room
   socket.on("join_room", (roomId) => {
     socket.join(roomId);
     console.log(`User ${socket.id} joined room ${roomId}`);
   });
 
-  // Send message
   socket.on("send_message", async (data) => {
     const { content, sender, room } = data;
     try {
@@ -52,17 +50,26 @@ io.on("connection", (socket) => {
     }
   });
 
-  // User online status
   socket.on("user_online", async (userId) => {
     await User.findByIdAndUpdate(userId, { isOnline: true });
     io.emit("user_status", { userId, isOnline: true });
   });
 
-  // Disconnect
   socket.on("disconnect", async () => {
     console.log("User disconnected:", socket.id);
   });
 });
 
 const PORT = process.env.PORT || 5000;
-server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+
+server.listen(PORT, "0.0.0.0", () => {
+  console.log(`Server running on port ${PORT}`);
+});
+
+process.on("uncaughtException", (err) => {
+  console.log("Uncaught Exception:", err.message);
+});
+
+process.on("unhandledRejection", (err) => {
+  console.log("Unhandled Rejection:", err.message);
+});
